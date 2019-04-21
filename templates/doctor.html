@@ -43,4 +43,21 @@
         {% endif %}
     {% endwith %}
 
+    {% if data %}
+        <table>
+            <tr>
+                {% for item in header %}
+                    <th>{{item}}</th>
+                {% endfor %}
+            </tr>
+            {% for row in data %}
+            <tr>
+                {% for attr in row %}
+                    <td>{{row[attr]}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
 {% endblock %}
