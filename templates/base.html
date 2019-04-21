@@ -1,0 +1,17 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Hospital Database</title>
+      {% else %}
+      <title>Welcome to Hospital Database</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Hospital Database: 
+          <a href="{{ url_for('index') }}">Home</a>
+          <a href="{{ url_for('doctor') }}">Doctor</a>
+        </div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>

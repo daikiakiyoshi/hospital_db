@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+	<h1> Welcome doctor </h1>
+	<h2> Select the table you want to see </h2>
+
+	<form method="POST" action="">
+        <select name = "table_selected"> 
+            {% for table in tables %}
+	        <option value= "{{table}}">{{ table }}</option>
+	    	{% endfor %}
+        </select>
+    	<button type="submit" name="submit">Submit</button>
+    </form> 
+
+    {% if select %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+
+    <h2> Add a patient record </h2>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }} 
+        <p>
+            {{ form.fname.label }}<br>
+            {{ form.fname(size=32) }}
+        </p>
+        <p>
+            {{ form.lname.label }}<br>
+            {{ form.lname(size=32) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+{% endblock %}
