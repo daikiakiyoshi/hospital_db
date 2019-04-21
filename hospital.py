@@ -13,6 +13,11 @@ class AddPatient(FlaskForm):
     lname = StringField('last name', validators=[DataRequired()])
     submit = SubmitField('Add')
 
+class AddMedicine(FlaskForm):
+    mname = StringField('Medicine name', validators=[DataRequired()])
+    price = StringField('price', validators=[DataRequired()])
+    submit = SubmitField('Add')
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -65,8 +70,52 @@ def doctor():
 		select = request.form.get('table_selected')
 		print(select)
 
+	return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header)
 
-	return render_template('doctor.html', title='Sign In', tables=doctor_tables, form=form, data=data, header=header)
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+	data = None
+	header = None
+	admin_tables = (['Patient Records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
+	
+	# add patient record
+	form = AddMedicine()
+	if form.validate_on_submit():
+		flash('medicine {}, price {}'.format(
+            form.mname.data, form.price.data))
 
+
+	# select table
+	if request.method == 'POST':
+		header = ['firstname', 'lastname', 'DOB', 'SSN']
+
+		data = [
+			{
+				'firstname': 'daiki',
+				'lastname': 'akiyoshi',
+				'DOB': 'day',
+				'SSN': '123456789'
+
+			},
+			{
+				'firstname': 'minh',
+				'lastname': 'vu',
+				'DOB': 'day',
+				'SSN': '23456790'
+
+			},
+			{
+				'firstname': 'james',
+				'lastname': 'khuat',
+				'DOB': 'day',
+				'SSN': '345678901'
+
+			},
+		]
+		
+		select = request.form.get('table_selected')
+		print(select)
+
+	return render_template('admin.html', title='Admin', tables=admin_tables, form=form, data=data, header=header)
 
 
