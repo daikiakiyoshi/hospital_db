@@ -22,6 +22,18 @@ class AddMedicine(FlaskForm):
 app = Flask(__name__)
 app.config.from_object(Config)
 
+table_to_properties = {
+	"doctors": ["doc_id", "name", "title"]
+}
+
+table_to_class = {
+	"patient_records": AddPatient()
+}
+
+table_to_insert = {
+	"patient_records": sql.insert_patient
+}
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -33,20 +45,24 @@ def doctor():
 	header = None
 	doctor_tables = (['Patient Records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
 	# add patient record
-	form = AddPatient()
-	if form.validate_on_submit():
-	    sql.insert_patient(form.fname.data, form.lname.data)
+	# form = AddPatient()
+	if request.method == 'POST':
+		#header = ['p_id','firstname', 'lastname']
+		select = request.form.get('table_selected')
+		header = table_to_properties[select]
+		data = sql.get_query(select)
+
+		form = table_to_class(select)
+		if form.validate_on_submit():
+			params = [getattr(form, prop) for prop in table_to_properties[select]]
+		    # sql.insert_patient(form.fname.data, form.lname.data)
+		    table_to_insert[select]([param.data for param in params])
 		#flash('fname {}, lname {}'.format(form.fname.data, form.lname.data))
 
 
 	# select table
 	# need to be fixed. For now this is triggered for all the post requests
-	if request.method == 'POST':
-		header = ['p_id','firstname', 'lastname']
-		data = sql.get_patients()
-		print(data)
-		select = request.form.get('table_selected')
-		print(select)
+	
 
 	return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header)
 

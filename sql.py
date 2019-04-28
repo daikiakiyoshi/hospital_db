@@ -68,6 +68,27 @@ def insert_patient(name, age):
         if conn is not None:
             conn.close()
 
+def get_query(select):
+    """ query data from the vendors table """
+    conn = None
+    data = []
+    try:
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM {select}")
+        row = cur.fetchone()
+        while row is not None:
+            data.append(row)
+            row = cur.fetchone()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return data
+
 def get_patients():
     """ query data from the vendors table """
     conn = None
