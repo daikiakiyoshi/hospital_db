@@ -1,22 +1,27 @@
 import psycopg2
 from config import config
+import sql_commands 
 
 def create_tables():
     """ create tables in the PostgreSQL database"""
-    commands = (
-        """
-        CREATE TABLE patients (
-            p_id SERIAL PRIMARY KEY,
-            fname VARCHAR(255) NOT NULL,
-            lname VARCHAR(255) NOT NULL
-        )
-        """,
-        """ CREATE TABLE doctors (
-                doc_id SERIAL PRIMARY KEY,
-                fname VARCHAR(255) NOT NULL,
-                lname VARCHAR(255) NOT NULL
-                )
-        """)
+    # commands = (
+    #     """
+    #     CREATE TABLE patients (
+    #         p_id SERIAL PRIMARY KEY,
+    #         fname VARCHAR(255) NOT NULL,
+    #         lname VARCHAR(255) NOT NULL
+    #     )
+    #     """,
+    #     """ CREATE TABLE doctors (
+    #             doc_id SERIAL PRIMARY KEY,
+    #             fname VARCHAR(255) NOT NULL,
+    #             lname VARCHAR(255) NOT NULL
+    #             )
+    #     """)
+
+    commands = tuple(sql_commands.CREATE_STATEMENTS)
+    #print(type(commands), len(commands))
+
     conn = None
     try:
         # read the connection parameters
@@ -37,10 +42,10 @@ def create_tables():
         if conn is not None:
             conn.close()
 
-def insert_patient(fname, lname):
+def insert_patient(name, age):
     """ insert a new patient into the patients table """
-    sql = """INSERT INTO patients(fname, lname)
-             VALUES(%s, %s);"""
+    sql = """INSERT INTO patients(name, age, ssn, date_in, date_out, diagnosis)
+             VALUES(%s, %s, None, None, None, None);"""
     conn = None
     patient_id = None
     try:
@@ -51,7 +56,7 @@ def insert_patient(fname, lname):
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (fname, lname))
+        cur.execute(sql, (name, age))
         #cur.execute("INSERT INTO Patients(fname, lname) VALUES('Daiki','Akiyoshi')")
         # commit the changes to the database
         conn.commit()
@@ -71,7 +76,7 @@ def get_patients():
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM patients")
+        cur.execute("SELECT * FROM patient_records")
         row = cur.fetchone()
         while row is not None:
             data.append(row)

@@ -23,12 +23,12 @@
     <form action="" method="post" novalidate>
         {{ form.hidden_tag() }} 
         <p>
-            {{ form.fname.label }}<br>
-            {{ form.fname(size=32) }}
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
         </p>
         <p>
-            {{ form.lname.label }}<br>
-            {{ form.lname(size=32) }}
+            {{ form.age.label }}<br>
+            {{ form.age(size=32) }}
         </p>
         <p>{{ form.submit() }}</p>
     </form>

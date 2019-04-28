@@ -42,7 +42,7 @@ def doctor():
 	# select table
 	# need to be fixed. For now this is triggered for all the post requests
 	if request.method == 'POST':
-		header = ['id','firstname', 'lastname']
+		header = ['p_id','firstname', 'lastname']
 		data = sql.get_patients()
 		print(data)
 		select = request.form.get('table_selected')
