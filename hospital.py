@@ -56,7 +56,7 @@ def doctor():
 		if form.validate_on_submit():
 			params = [getattr(form, prop) for prop in table_to_properties[select]]
 		    # sql.insert_patient(form.fname.data, form.lname.data)
-		    table_to_insert[select]([param.data for param in params])
+			table_to_insert[select]([param.data for param in params])
 		#flash('fname {}, lname {}'.format(form.fname.data, form.lname.data))
 
 
