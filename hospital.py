@@ -18,12 +18,12 @@ class Config(object):
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
 class AddPatient(FlaskForm):
-	name = StringField('first name', validators=[DataRequired()])
-	age = StringField('last name', validators=[DataRequired()])
-	ssn = StringField('last name', validators=[DataRequired()])
-	date_in = StringField('last name', validators=[DataRequired()])
-	date_out = StringField('last name', validators=[DataRequired()])
-	diagnosis = StringField('last name', validators=[DataRequired()])
+	name = StringField('Name', validators=[DataRequired()])
+	age = StringField('Age', validators=[DataRequired()])
+	ssn = StringField('SSN', validators=[DataRequired()])
+	date_in = StringField('Date In', validators=[DataRequired()])
+	date_out = StringField('Date Out', validators=[DataRequired()])
+	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
 class AddMedicine(FlaskForm):
@@ -42,6 +42,7 @@ def index():
 
 @app.route('/doctor', methods=['GET', 'POST'])
 def doctor():
+	print('method', request.method)
 
 	table_to_properties = {
 		"doctors": ["doc_id", "name", "title"],
@@ -65,22 +66,26 @@ def doctor():
 	# add patient record
 	# form = AddPatient()
 	if request.method == 'POST':
-		#header = ['p_id','firstname', 'lastname']
 		select = request.form.get('table_selected')
-		header = table_to_properties[select]
-		data = sql.get_query(select)
-		#print(select, header, data)
+		if select is not None:
+			#header = ['p_id','firstname', 'lastname']
+			header = table_to_properties[select]
+			data = sql.get_query(select)
+			# print(select, header, data)
 
-		form = table_to_class[select]
-		if form.validate_on_submit():
-			params = [getattr(form, prop) for prop in table_to_properties[select]]
-		    # sql.insert_patient(form.fname.data, form.lname.data)
-			table_to_insert[select]([param.data for param in params])
+			form = table_to_class[select]
 
-		#flash('fname {}, lname {}'.format(form.fname.data, form.lname.data))
+			if form.validate_on_submit():
+				params = [getattr(form, prop) for prop in table_to_properties[select]]
+				# sql.insert_patient(form.fname.data, form.lname.data)
+				table_to_insert[select]([param.data for param in params])
+
+			#flash('fname {}, lname {}'.format(form.fname.data, form.lname.data))
+		else:
+			pass
 
 
-	# select table
+	# TODO: select table
 	# need to be fixed. For now this is triggered for all the post requests
 	
 	print(select, header, data)

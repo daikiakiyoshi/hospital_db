@@ -17,26 +17,23 @@
 <!--     {% if select %}
         <p>{{ message }}</p>
     {% endif %} -->
-
-
-
-    <h2>Add a new entry to {{select}} </h2>
+    {% if select %}
+        <h2>Add a new entry to {{select}} </h2>
+    {% endif %}
     <form action="" method="post" novalidate>
-<!--         {% if form %}
-            {{ form.hidden_tag() }} 
-            <p>
-                {{ form.name.label }}<br>
-                {{ form.name(size=32) }}
-            </p>
-            <p>
-                {{ form.age.label }}<br>
-                {{ form.age(size=32) }}
-            </p>
-            <p>{{ form.submit() }}</p>
-            {% for item in header %}
-                <li>{{ message }}</li>
+        {% if form %}
+            {{ form.hidden_tag() }}
+            
+            {% for item in header[1:] %}
+                <!-- <li>{{ item }}</li> -->
+                <p>
+                    {{ form[item].label }}<br>
+                    {{ form[item](size=32) }}
+                </p>
             {% endfor %}
-        {% endif %} -->
+
+            <p>{{ form.submit() }}</p>
+        {% endif %}
     </form>
 
 
