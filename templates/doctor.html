@@ -11,61 +11,7 @@
 	        <option value= "{{table}}">{{ table }}</option>
 	    	{% endfor %}
         </select>
-    	<button type="submit" name="submit">Submit</button>
+    	<button type="submit">Submit</button>
     </form> 
-
-<!--     {% if select %}
-        <p>{{ message }}</p>
-    {% endif %} -->
-    {% if select %}
-        <h2>Add a new entry to {{select}} </h2>
-    {% endif %}
-    <form action="" method="post" novalidate>
-        {% if form %}
-            {{ form.hidden_tag() }}
-            
-            {% for item in header[1:] %}
-                <!-- <li>{{ item }}</li> -->
-                <p>
-                    {{ form[item].label }}<br>
-                    {{ form[item](size=32) }}
-                </p>
-            {% endfor %}
-
-            <p>{{ form.submit() }}</p>
-        {% endif %}
-    </form>
-
-
-<!--
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-    {% endwith %}
-
--->
-
-    {% if data %}
-        <table>
-            <tr>
-                {% for item in header %}
-                    <th>{{item}}</th>
-                {% endfor %}
-            </tr>
-            {% for row in data %}
-            <tr>
-                {% for attr in row %}
-                    <td>{{attr}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
 
 {% endblock %}

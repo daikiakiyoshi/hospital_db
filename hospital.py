@@ -7,22 +7,26 @@
 
 
 from flask import Flask
-from flask import render_template, flash, request
+from flask import render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, IntegerField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
 import os
+import time
+import datetime
 import sql as sql
+
 
 class Config(object):
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
 class AddPatient(FlaskForm):
 	name = StringField('Name', validators=[DataRequired()])
-	age = StringField('Age', validators=[DataRequired()])
+	age = IntegerField('Age', validators=[DataRequired()])
 	ssn = StringField('SSN', validators=[DataRequired()])
-	date_in = StringField('Date In', validators=[DataRequired()])
-	date_out = StringField('Date Out', validators=[DataRequired()])
+	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()], )
+	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
 	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
@@ -42,11 +46,28 @@ def index():
 
 @app.route('/doctor', methods=['GET', 'POST'])
 def doctor():
-	print('method', request.method)
+
+	doctor_tables = (['patient_records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
+	
+	if request.method == 'POST':
+		select = request.form.get('table_selected')
+
+		# query data from the database
+		data = sql.get_query(select)
+
+		# jump to result page which displays the selected table and input form
+		return redirect(url_for('result', title='result', data=data, select=select))
+
+	#return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header, select=select)
+	return render_template('doctor.html', title='Doctor', tables=doctor_tables)
+
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
 
 	table_to_properties = {
-		"doctors": ["doc_id", "name", "title"],
-		"patient_records": ["p_id", "name", "age", "ssn", "date_in", "date_out", "diagnosis"]
+		"doctors": ["name", "title"],
+		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"]
 	}
 
 	table_to_class = {
@@ -57,39 +78,35 @@ def doctor():
 		"patient_records": sql.insert_patient
 	}
 
-	form = None
-	data = None
-	header = None
-	select = None
+	select = request.args.get('select')
+	data = request.args.get('data')
 
-	doctor_tables = (['patient_records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
-	# add patient record
-	# form = AddPatient()
-	if request.method == 'POST':
-		select = request.form.get('table_selected')
-		if select is not None:
-			#header = ['p_id','firstname', 'lastname']
-			header = table_to_properties[select]
-			data = sql.get_query(select)
-			# print(select, header, data)
+	# get header
+	header = sql.get_header(select)
 
-			form = table_to_class[select]
+	# get insert form
+	form = table_to_class[select]
 
-			if form.validate_on_submit():
-				params = [getattr(form, prop) for prop in table_to_properties[select]]
-				# sql.insert_patient(form.fname.data, form.lname.data)
-				table_to_insert[select]([param.data for param in params])
+	if form.validate_on_submit():
+		params = [getattr(form, prop).data for prop in table_to_properties[select]]
+		# remove '
+		#columns = [s.strip("'") for s in table_to_properties[select]]
+		columns = table_to_properties[select]
+		# temp_params = []
+		# for param in params:
+		# 	if isinstance(param, datetime.date):
+		# 		timestamp = time.mktime(param.timetuple()) # DO NOT USE IT WITH UTC DATE
+		# 		temp_params.append(timestamp)
+		# 	else:
+		# 		temp_params.append(param)
+		# #print(temp_params)
+		sql.insert(tuple(params), select, ', '.join(columns))
+		# sql.insert_patient(form.fname.data, form.lname.data)
+		#print(form.name.data, form.age.data)
 
-			#flash('fname {}, lname {}'.format(form.fname.data, form.lname.data))
-		else:
-			pass
 
-
-	# TODO: select table
-	# need to be fixed. For now this is triggered for all the post requests
+	return render_template('result.html', title='result', form=form, data=data, header=header, select=select)
 	
-	print(select, header, data)
-	return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header, select=select)
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

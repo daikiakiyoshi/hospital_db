@@ -3,25 +3,7 @@ from config import config
 import sql_commands 
 
 def create_tables():
-    """ create tables in the PostgreSQL database"""
-    # commands = (
-    #     """
-    #     CREATE TABLE patients (
-    #         p_id SERIAL PRIMARY KEY,
-    #         fname VARCHAR(255) NOT NULL,
-    #         lname VARCHAR(255) NOT NULL
-    #     )
-    #     """,
-    #     """ CREATE TABLE doctors (
-    #             doc_id SERIAL PRIMARY KEY,
-    #             fname VARCHAR(255) NOT NULL,
-    #             lname VARCHAR(255) NOT NULL
-    #             )
-    #     """)
-
     commands = tuple(sql_commands.CREATE_STATEMENTS)
-    #print(type(commands), len(commands))
-
     conn = None
     try:
         # read the connection parameters
@@ -68,6 +50,30 @@ def insert_patient(name, age):
         if conn is not None:
             conn.close()
 
+def insert(params, select, columns):
+    sql = f"""INSERT INTO {select}({columns}) VALUES{params};"""
+    conn = None
+    try:
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql)
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+
 def get_query(select):
     """ query data from the vendors table """
     conn = None
@@ -89,26 +95,24 @@ def get_query(select):
             conn.close()
     return data
 
-def get_patients():
+
+def get_header(select):
     """ query data from the vendors table """
     conn = None
-    data = []
+    header = None
     try:
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM patient_records")
-        row = cur.fetchone()
-        while row is not None:
-            data.append(row)
-            row = cur.fetchone()
+        cur.execute(f"SELECT * FROM {select} LIMIT 0")
+        header = [desc[0] for desc in cur.description]
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-    return data
+    return header
 
 if __name__ == '__main__':
     create_tables()
