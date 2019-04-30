@@ -2,10 +2,6 @@
 # add form (generalized version)
 # add comments
 
-
-
-
-
 from flask import Flask
 from flask import render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
@@ -17,7 +13,6 @@ import time
 import datetime
 import sql as sql
 
-
 class Config(object):
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
@@ -25,19 +20,28 @@ class AddPatient(FlaskForm):
 	name = StringField('Name', validators=[DataRequired()])
 	age = IntegerField('Age', validators=[DataRequired()])
 	ssn = StringField('SSN', validators=[DataRequired()])
-	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()], )
+	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
 	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
 	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
-class AddMedicine(FlaskForm):
-	mname = StringField('Medicine name', validators=[DataRequired()])
-	price = StringField('price', validators=[DataRequired()])
+# Is the user typing in medicine ID? How would the user know the ID?
+class AddBilledMedicine(FlaskForm):
+	p_id = StringField('p_id', validators=[DataRequired()])
+	med_id = StringField('serv_id', validators=[DataRequired()])
+	units = IntegerField('units', validators=[DataRequired()])
+	status = StringField('status', validators=[DataRequired()])
+	submit = SubmitField('Add')
+
+class AddBilledService(FlaskForm):
+	p_id = StringField('p_id', validators=[DataRequired()])
+	serv_id = StringField('serv_id', validators=[DataRequired()])
+	units = IntegerField('units', validators=[DataRequired()])
+	status = StringField('status', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
 
 @app.route('/')
 @app.route('/index')
@@ -47,65 +51,96 @@ def index():
 @app.route('/doctor', methods=['GET', 'POST'])
 def doctor():
 
-	doctor_tables = (['patient_records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
+	doctor_tables = (['patient_records', 'medicine', 'service', 'billed_medicine', 'billed_service', 'rooms', 'stays_in'])
 	
+	# insert access for tables
+	access = {
+		'patient_records': True,
+		'medicine': False,
+		'service': False,
+		'billed_medicine' : True,
+		'billed_service': True,
+		'rooms': False,
+		'stays_in' : False
+	}
+
 	if request.method == 'POST':
 		select = request.form.get('table_selected')
+		if access[select] == True:
+			# jump to insert page which displays input form
+			return redirect(url_for('insert', title='insert', select=select))
+		else:
+			# jump to result page which displays data
+			return redirect(url_for('result', title='result', select=select))
 
-		# query data from the database
-		data = sql.get_query(select)
-
-		# jump to result page which displays the selected table and input form
-		return redirect(url_for('result', title='result', data=data, select=select))
 
 	#return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header, select=select)
 	return render_template('doctor.html', title='Doctor', tables=doctor_tables)
 
 
-@app.route('/result', methods=['GET', 'POST'])
-def result():
-
+@app.route('/insert', methods=['GET', 'POST'])
+def insert():
 	table_to_properties = {
-		"doctors": ["name", "title"],
-		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"]
+        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
+        "billed_service" : ["p_id", "serv_id", "units", "status"],
+        "billed_medicine" : ["p_id","med_id", "units", "status"]
 	}
 
 	table_to_class = {
-		"patient_records": AddPatient()
-	}
-
-	table_to_insert = {
-		"patient_records": sql.insert_patient
+		"patient_records": AddPatient(),
+		"billed_medicine": AddBilledMedicine(),
+		"billed_service" : AddBilledService()
 	}
 
 	select = request.args.get('select')
-	data = request.args.get('data')
-
-	# get header
-	header = sql.get_header(select)
 
 	# get insert form
 	form = table_to_class[select]
 
+	#get header
+	header = sql.get_header(select)
+
 	if form.validate_on_submit():
 		params = [getattr(form, prop).data for prop in table_to_properties[select]]
-		# remove '
-		#columns = [s.strip("'") for s in table_to_properties[select]]
 		columns = table_to_properties[select]
-		# temp_params = []
-		# for param in params:
-		# 	if isinstance(param, datetime.date):
-		# 		timestamp = time.mktime(param.timetuple()) # DO NOT USE IT WITH UTC DATE
-		# 		temp_params.append(timestamp)
-		# 	else:
-		# 		temp_params.append(param)
-		# #print(temp_params)
-		sql.insert(tuple(params), select, ', '.join(columns))
-		# sql.insert_patient(form.fname.data, form.lname.data)
-		#print(form.name.data, form.age.data)
+		temp_params = []
+		for param in params:
+			#convert datetime.date into string
+			if isinstance(param, datetime.date):
+				temp_params.append(param.strftime('%Y-%m-%d'))
+			else:
+				temp_params.append(param)
 
+		# insert
+		sql.insert(tuple(temp_params), select, ', '.join(columns))
+		# jump to query result page which displays input form
+		return redirect(url_for('result', title='result', select=select))
 
-	return render_template('result.html', title='result', form=form, data=data, header=header, select=select)
+	return render_template('insert.html', title='insert', form=form, header=header, select=select)
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+	table_to_properties = {
+        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
+        "billed_service" : ["p_id", "serv_id", "units", "status"],
+        "billed_medicine" : ["p_id","med_id", "units", "status"]
+	}
+
+	table_to_class = {
+		"patient_records": AddPatient(),
+		"billed_medicine": AddBilledMedicine(),
+		"billed_service" : AddBilledService()
+	}
+
+	select = request.args.get('select')
+	# query data from the database
+	data = sql.get_query(select)
+
+	# get header
+	header = sql.get_header(select)
+
+	return render_template('result.html', title='result', data=data, header=header, select=select)
+
 	
 
 @app.route('/admin', methods=['GET', 'POST'])

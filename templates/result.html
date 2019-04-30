@@ -3,22 +3,8 @@
 {% block content %}
 
     {% if select %}
-        <h2>Add a new entry to {{select}} </h2>
+        <h2>Table for {{select}} </h2>
     {% endif %}
-    <form action="" method="post" novalidate>
-        {% if form %}
-            {{ form.hidden_tag() }}
-            
-            {% for item in header[1:] %}
-                <p>
-                    {{ form[item].label }}<br>
-                    {{ form[item](size=32) }}
-                </p>
-            {% endfor %}
-
-            <p name="action" value="insert">{{ form.submit() }}</p>
-        {% endif %}
-    </form>
 
 
     {% if data %}

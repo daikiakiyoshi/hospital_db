@@ -24,31 +24,6 @@ def create_tables():
         if conn is not None:
             conn.close()
 
-def insert_patient(name, age):
-    """ insert a new patient into the patients table """
-    sql = """INSERT INTO patients(name, age, ssn, date_in, date_out, diagnosis)
-             VALUES(%s, %s, None, None, None, None);"""
-    conn = None
-    patient_id = None
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql, (name, age))
-        #cur.execute("INSERT INTO Patients(fname, lname) VALUES('Daiki','Akiyoshi')")
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
 
 def insert(params, select, columns):
     sql = f"""INSERT INTO {select}({columns}) VALUES{params};"""
@@ -72,10 +47,7 @@ def insert(params, select, columns):
         if conn is not None:
             conn.close()
 
-
-
 def get_query(select):
-    """ query data from the vendors table """
     conn = None
     data = []
     try:
