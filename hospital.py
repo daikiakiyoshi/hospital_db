@@ -81,7 +81,7 @@ def insert():
 		"departments"	 : i_forms.AddDepartments(),
 		"worksfor"		 : i_forms.AddWorksFor(),
 		"treatedby"		 : i_forms.AddTreatedBy(),
-		"service"		 : i_forms.AddService()
+		"service"		 : i_forms.AddService(),
 		"medicine"		 : i_forms.AddMedicine(),
 		"rooms"			 : i_forms.AddRooms(),
 		"stays_in"		 : i_forms.AddStaysIn(),
@@ -165,7 +165,7 @@ def admin():
 		'departments': True, 
 		'worksfor': True,
 		'patient_records': True,
-		'treatedby': True
+		'treatedby': True,
 		'medicine': True,
 		'service': True,
 		'billed_medicine' : True,

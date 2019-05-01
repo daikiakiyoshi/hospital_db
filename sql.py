@@ -27,10 +27,17 @@ def create_tables():
 
 def insert(params, select, table_with_id):
     header = get_header(select)
-    if select in table_with_id:
-        header = header[:-1]
-    values = [params[prop] for prop in header]
-    sql = f"""INSERT INTO {select}({", ".join(header)}) VALUES{", ".join(values)};"""
+
+    if select not in table_with_id:
+        header = header[1:]
+
+    values = [f"\'{str(params[prop])}\'" for prop in header]
+
+    print(values)
+   
+    print(", ".join(values))
+    sql = f"""INSERT INTO {select}({", ".join(header)}) VALUES ({", ".join(values)});"""
+    print(sql)
     conn = None
     try:
         # read database configuration

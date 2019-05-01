@@ -13,12 +13,20 @@
                 {% for item in header %}
                     <th>{{item}}</th>
                 {% endfor %}
+                <th></th>
+                <th></th>
             </tr>
-            {% for row in data %}
+          	{% for n in range(data|length) %}
             <tr>
-                {% for attr in row %}
-                    <td>{{attr}}</td>
-                {% endfor %}
+            	<form method="POST">
+	                {% for attr in data[n] %}
+	                	<td>
+	                    	<input type="text" name={{attr}} value={{attr}}>
+	                    </td>
+	                {% endfor %}
+	                <td><input type="submit" name={{'update'~ n|string}} value="Update"></td>
+	                <td><input type="submit" name={{'delete'~ n|string}} value="Delete"></td>
+	            </form>
             </tr>
             {% endfor %}
         </table>
@@ -26,3 +34,4 @@
 
 
 {% endblock %}
+
