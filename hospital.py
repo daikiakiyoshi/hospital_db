@@ -8,6 +8,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
+import insert_forms as i_forms
 import os
 import time
 import datetime
@@ -15,31 +16,6 @@ import sql as sql
 
 class Config(object):
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-
-class AddPatient(FlaskForm):
-	name = StringField('Name', validators=[DataRequired()])
-	age = IntegerField('Age', validators=[DataRequired()])
-	ssn = StringField('SSN', validators=[DataRequired()])
-	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
-	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
-	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
-	doc_id = StringField('Doctor ID', validators=[DataRequired()])
-	submit = SubmitField('Add')
-
-# Is the user typing in medicine ID? How would the user know the ID?
-class AddBilledMedicine(FlaskForm):
-	p_id = StringField('p_id', validators=[DataRequired()])
-	med_id = StringField('med_id', validators=[DataRequired()])
-	units = IntegerField('units', validators=[DataRequired()])
-	status = StringField('status', validators=[DataRequired()])
-	submit = SubmitField('Add')
-
-class AddBilledService(FlaskForm):
-	p_id = StringField('p_id', validators=[DataRequired()])
-	serv_id = StringField('serv_id', validators=[DataRequired()])
-	units = IntegerField('units', validators=[DataRequired()])
-	status = StringField('status', validators=[DataRequired()])
-	submit = SubmitField('Add')
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -82,15 +58,33 @@ def doctor():
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
 	table_to_properties = {
-        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis", "doc_id"],
-        "billed_service" : ["p_id", "serv_id", "units", "status"],
-        "billed_medicine" : ["p_id","med_id", "units", "status"]
+
+		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis", "doc_id"],
+		"billed_service" : ["p_id", "serv_id", "units", "status"],
+		"billed_medicine": ["p_id","med_id", "units", "status"],
+		"doctors"		 : ["name", "title"],
+		"departments"	 : ["name"],
+		"worksfor"		 : ["doc_id", "dep_id"],
+		"treatedby"		 : ["doc_id", "p_id"],
+		"service"		 : ["name", "category", "price", "unit_type"],
+		"medicine"		 : ["name", "price", "unit_type"],
+		"rooms"			 : ["room_type", "max_beds", "available_beds"],
+		"stays_in"		 : ["p_id", "room_id"]
+
 	}
 
 	table_to_class = {
-		"patient_records": AddPatient(),
-		"billed_medicine": AddBilledMedicine(),
-		"billed_service" : AddBilledService()
+		"patient_records": i_forms.AddPatient(),
+		"billed_medicine": i_forms.AddBilledMedicine(),
+		"billed_service" : i_forms.AddBilledService(),
+		"doctors"		 : i_forms.AddDoctors(),
+		"departments"	 : i_forms.AddDepartments(),
+		"worksfor"		 : i_forms.AddWorksFor(),
+		"treatedby"		 : i_forms.AddTreatedBy(),
+		"service"		 : i_forms.AddService()
+		"medicine"		 : i_forms.AddMedicine(),
+		"rooms"			 : i_forms.AddRooms(),
+		"stays_in"		 : i_forms.AddStaysIn(),
 	}
 
 	table_with_id = ["billed_medicine","billed_service"]
@@ -147,18 +141,6 @@ def insert():
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
-	table_to_properties = {
-        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
-        "billed_service" : ["p_id", "serv_id", "units", "status"],
-        "billed_medicine" : ["p_id","med_id", "units", "status"]
-	}
-
-	table_to_class = {
-		"patient_records": AddPatient(),
-		"billed_medicine": AddBilledMedicine(),
-		"billed_service" : AddBilledService()
-	}
-
 	select = request.args.get('select')
 	# query data from the database
 	data = sql.get_query(select)
@@ -172,49 +154,34 @@ def result():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-	data = None
-	header = None
-	admin_tables = (['Patient Records', 'Medicines', 'Services', 'Billed Medicine', 'Billed Services', 'Room', 'Stays In'])
+	admin_tables = (['doctors', 'departments', 'worksfor', 
+					'patient_records', 'treatedby', 'medicine', 
+					'service', 'billed_medicine', 'billed_service', 
+					'rooms', 'stays_in'])
+	
+	# insert access for tables
+	access = {
+		'doctors': True, 
+		'departments': True, 
+		'worksfor': True,
+		'patient_records': True,
+		'treatedby': True
+		'medicine': True,
+		'service': True,
+		'billed_medicine' : True,
+		'billed_service': True,
+		'rooms': True,
+		'stays_in' : True
+	}
 
-	# add patient record
-	form = AddMedicine()
-	if form.validate_on_submit():
-		flash('medicine {}, price {}'.format(
-			form.mname.data, form.price.data))
-
-
-	# select table
 	if request.method == 'POST':
-		header = ['firstname', 'lastname', 'DOB', 'SSN']
-
-		data = [
-			{
-				'firstname': 'daiki',
-				'lastname': 'akiyoshi',
-				'DOB': 'day',
-				'SSN': '123456789'
-
-			},
-			{
-				'firstname': 'minh',
-				'lastname': 'vu',
-				'DOB': 'day',
-				'SSN': '23456790'
-
-			},
-			{
-				'firstname': 'james',
-				'lastname': 'khuat',
-				'DOB': 'day',
-				'SSN': '345678901'
-
-			},
-		]
-
 		select = request.form.get('table_selected')
-		print(select)
+		# jump to insert page which displays input form
+		return redirect(url_for('insert', title='insert', select=select))
 
-	return render_template('admin.html', title='Admin', tables=admin_tables, form=form, data=data, header=header)
+	return render_template('admin.html', title='Admin', tables=admin_tables)
+
+
 
 if __name__ == '__main__':
    app.run(debug=True)
