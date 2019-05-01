@@ -8,16 +8,50 @@
     <form action="" method="post" novalidate>
         {% if form %}
             {{ form.hidden_tag() }}
-            
-            {% for item in header[1:] %}
-                <p>
-                    {{ form[item].label }}<br>
-                    {{ form[item](size=32) }}
-                </p>
-            {% endfor %}
+
+                {% for item in columns %}
+                    <p>
+                        {{ form[item].label }}<br>
+                        {{ form[item](size=32) }}
+                    </p>
+                {% endfor %}
+
+
+<!--             {% if need_id %}
+                {% for item in header %}
+                    <p>
+                        {{ form[item].label }}<br>
+                        {{ form[item](size=32) }}
+                    </p>
+                {% endfor %}
+            {% else %}
+                {% for item in header[1:] %}
+                    <p>
+                        {{ form[item].label }}<br>
+                        {{ form[item](size=32) }}
+                    </p>
+                {% endfor %}
+            {% endif %} -->
 
             <p name="action" value="insert">{{ form.submit() }}</p>
         {% endif %}
     </form>
+
+    {% if data %}
+        <table>
+            <tr>
+                {% for item in header %}
+                    <th>{{item}}</th>
+                {% endfor %}
+            </tr>
+            {% for row in data %}
+            <tr>
+                {% for attr in row %}
+                    <td>{{attr}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 
 {% endblock %}

@@ -23,12 +23,13 @@ class AddPatient(FlaskForm):
 	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
 	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
 	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
+	doc_id = StringField('Doctor ID', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
 # Is the user typing in medicine ID? How would the user know the ID?
 class AddBilledMedicine(FlaskForm):
 	p_id = StringField('p_id', validators=[DataRequired()])
-	med_id = StringField('serv_id', validators=[DataRequired()])
+	med_id = StringField('med_id', validators=[DataRequired()])
 	units = IntegerField('units', validators=[DataRequired()])
 	status = StringField('status', validators=[DataRequired()])
 	submit = SubmitField('Add')
@@ -81,7 +82,7 @@ def doctor():
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
 	table_to_properties = {
-        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
+        "patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis", "doc_id"],
         "billed_service" : ["p_id", "serv_id", "units", "status"],
         "billed_medicine" : ["p_id","med_id", "units", "status"]
 	}
@@ -92,17 +93,32 @@ def insert():
 		"billed_service" : AddBilledService()
 	}
 
+	table_with_id = ["billed_medicine","billed_service"]
+
 	select = request.args.get('select')
+
+	# query data from the database
+	data = sql.get_query(select)
 
 	# get insert form
 	form = table_to_class[select]
 
 	#get header
+	#header = sql.get_header(select)
 	header = sql.get_header(select)
+
+	# get columns
+	columns = table_to_properties[select]
+
+	need_id = select in table_with_id
 
 	if form.validate_on_submit():
 		params = [getattr(form, prop).data for prop in table_to_properties[select]]
 		columns = table_to_properties[select]
+
+		if select = "patient_records":
+			params = params[:-1]
+
 		temp_params = []
 		for param in params:
 			#convert datetime.date into string
@@ -113,10 +129,12 @@ def insert():
 
 		# insert
 		sql.insert(tuple(temp_params), select, ', '.join(columns))
+
 		# jump to query result page which displays input form
 		return redirect(url_for('result', title='result', select=select))
 
-	return render_template('insert.html', title='insert', form=form, header=header, select=select)
+	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
+							select=select, need_id=need_id, columns=columns)
 
 @app.route('/result', methods=['GET', 'POST'])
 def result():
