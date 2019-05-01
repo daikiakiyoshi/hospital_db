@@ -12,7 +12,6 @@ DROP_ALL = """
     drop table if exists stays_in CASCADE;
 """
 
-
 CREATE_DOCTORS = """
     CREATE TABLE doctors (
         doc_id SERIAL PRIMARY KEY,
@@ -108,6 +107,47 @@ STAYS_IN = """
     )
 """
 
+INSERT_DOCTORS = """
+    INSERT INTO doctors(name, title)
+    VALUES
+        ('Doctor 1', 'Title 1'),
+        ('Doctor 2', "Title 2'),
+        ('Doctor 3', "Title 3'),
+        ('Doctor 4', "Title 4'),
+        ('Doctor 5', "Title 5');
+"""
+
+INSERT_DEPARTMENTS = """
+    INSERT INTO departments(name)
+    VALUES
+        ('Dep 1'),
+        ('Dep 2'),
+        ('Dep 3'),
+        ('Dep 4'),
+        ('Dep 5');
+"""
+
+INSERT_SERVICES = """
+    INSERT INTO services(name, category, price, unit_type)
+    VALUES
+        ('serv 1', 'cat', 2.00, 'day'),
+        ('serv 2', 'cat', 2.00, 'day'),
+        ('serv 3', 'cat', 2.00, 'day'),
+        ('serv 4', 'cat', 2.00, 'day'),
+        ('serv 5', 'cat', 2.00, 'day');
+"""
+
+INSERT_MEDICINE = """
+    INSERT INTO medicine(name, price, unit_type)
+    VALUES
+        ('med 1', 'cat', 1.00, 'tablet'),
+        ('med 2', 'cat', 1.00, 'tablet'),
+        ('med 3', 'cat', 1.00, 'tablet'),
+        ('med 4', 'cat', 1.00, 'tablet'),
+        ('med 5', 'cat', 1.00, 'tablet');
+"""
+
 CREATE_STATEMENTS = [DROP_ALL, CREATE_DOCTORS, CREATE_DEPARTMENTS, CREATE_WORKSFOR, CREATE_PATIENT_RECORDS,
                         CREATE_TREATED_BY, CREATE_SERVICE, CREATE_MEDICINE, CREATE_BILLED_SERVICE,
-                        CREATE_BILLED_MEDICINE, CREATE_ROOMS, STAYS_IN]
+                        CREATE_BILLED_MEDICINE, CREATE_ROOMS, STAYS_IN, INSERT_DOCTORS, INSERT_DEPARTMENTS,
+                        INSERT_MEDICINE, INSERT_SERVICES]
