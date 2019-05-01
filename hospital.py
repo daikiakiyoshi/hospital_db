@@ -17,34 +17,6 @@ import sql as sql
 class Config(object):
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
-<<<<<<< HEAD
-class AddPatient(FlaskForm):
-	name = StringField('Name', validators=[DataRequired()])
-	age = IntegerField('Age', validators=[DataRequired()])
-	ssn = StringField('SSN', validators=[DataRequired()])
-	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
-	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
-	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
-	doc_id = StringField('Doctor ID', validators=[DataRequired()])
-	submit = SubmitField('Add')
-
-# Is the user typing in medicine ID? How would the user know the ID?
-class AddBilledMedicine(FlaskForm):
-	p_id = StringField('p_id', validators=[DataRequired()])
-	med_id = StringField('med_id', validators=[DataRequired()])
-	units = IntegerField('units', validators=[DataRequired()])
-	status = StringField('status', validators=[DataRequired()])
-	submit = SubmitField('Add')
-
-class AddBilledService(FlaskForm):
-	p_id = StringField('p_id', validators=[DataRequired()])
-	serv_id = StringField('serv_id', validators=[DataRequired()])
-	units = IntegerField('units', validators=[DataRequired()])
-	status = StringField('status', validators=[DataRequired()])
-	submit = SubmitField('Add')
-=======
->>>>>>> Minh
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
