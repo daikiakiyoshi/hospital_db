@@ -25,8 +25,12 @@ def create_tables():
             conn.close()
 
 
-def insert(params, select, columns):
-    sql = f"""INSERT INTO {select}({columns}) VALUES{params};"""
+def insert(params, select, table_with_id):
+    header = get_header(select)
+    if select in table_with_id:
+        header = header[:-1]
+    values = [params[prop] for prop in header]
+    sql = f"""INSERT INTO {select}({", ".join(header)}) VALUES{", ".join(values)};"""
     conn = None
     try:
         # read database configuration

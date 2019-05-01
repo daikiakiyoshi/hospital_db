@@ -113,22 +113,31 @@ def insert():
 	need_id = select in table_with_id
 
 	if form.validate_on_submit():
-		params = [getattr(form, prop).data for prop in table_to_properties[select]]
-		columns = table_to_properties[select]
+		params = {}
+		for prop in table_to_properties[select]:
+			value = getattr(form, prop).data
+			if isinstance(value, datetime.date):
+				value = value.strftime('%Y-%m-%d')
+			params[prop] = value
 
-		if select = "patient_records":
-			params = params[:-1]
+		sql.insert(params, select, table_with_id)
 
-		temp_params = []
-		for param in params:
-			#convert datetime.date into string
-			if isinstance(param, datetime.date):
-				temp_params.append(param.strftime('%Y-%m-%d'))
-			else:
-				temp_params.append(param)
+		# params = [getattr(form, prop).data for prop in table_to_properties[select]]
+		# columns = table_to_properties[select]
+
+		# if select == "patient_records":
+		# 	params = params[:-1]
+
+		# temp_params = []
+		# for param in params:
+		# 	#convert datetime.date into string
+		# 	if isinstance(param, datetime.date):
+		# 		temp_params.append(param.strftime('%Y-%m-%d'))
+		# 	else:
+		# 		temp_params.append(param)
 
 		# insert
-		sql.insert(tuple(temp_params), select, ', '.join(columns))
+		# sql.insert(tuple(temp_params), select, ', '.join(columns))
 
 		# jump to query result page which displays input form
 		return redirect(url_for('result', title='result', select=select))
