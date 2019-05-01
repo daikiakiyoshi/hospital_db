@@ -111,10 +111,10 @@ INSERT_DOCTORS = """
     INSERT INTO doctors(name, title)
     VALUES
         ('Doctor 1', 'Title 1'),
-        ('Doctor 2', "Title 2'),
-        ('Doctor 3', "Title 3'),
-        ('Doctor 4', "Title 4'),
-        ('Doctor 5', "Title 5');
+        ('Doctor 2', 'Title 2'),
+        ('Doctor 3', 'Title 3'),
+        ('Doctor 4', 'Title 4'),
+        ('Doctor 5', 'Title 5');
 """
 
 INSERT_DEPARTMENTS = """
@@ -128,7 +128,7 @@ INSERT_DEPARTMENTS = """
 """
 
 INSERT_SERVICES = """
-    INSERT INTO services(name, category, price, unit_type)
+    INSERT INTO service(name, category, price, unit_type)
     VALUES
         ('serv 1', 'cat', 2.00, 'day'),
         ('serv 2', 'cat', 2.00, 'day'),
@@ -140,11 +140,11 @@ INSERT_SERVICES = """
 INSERT_MEDICINE = """
     INSERT INTO medicine(name, price, unit_type)
     VALUES
-        ('med 1', 'cat', 1.00, 'tablet'),
-        ('med 2', 'cat', 1.00, 'tablet'),
-        ('med 3', 'cat', 1.00, 'tablet'),
-        ('med 4', 'cat', 1.00, 'tablet'),
-        ('med 5', 'cat', 1.00, 'tablet');
+        ('med 1', 1.00, 'tablet'),
+        ('med 2', 1.00, 'tablet'),
+        ('med 3', 1.00, 'tablet'),
+        ('med 4', 1.00, 'tablet'),
+        ('med 5', 1.00, 'tablet');
 """
 
 CREATE_STATEMENTS = [DROP_ALL, CREATE_DOCTORS, CREATE_DEPARTMENTS, CREATE_WORKSFOR, CREATE_PATIENT_RECORDS,
