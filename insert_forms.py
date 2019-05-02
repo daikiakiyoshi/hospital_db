@@ -11,7 +11,6 @@ class AddPatient(FlaskForm):
 	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
 	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
 	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
-	doc_id = StringField('doc_id', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
 # Is the user typing in medicine ID? How would the user know the ID?
@@ -65,6 +64,17 @@ class AddRooms(FlaskForm):
 class AddStaysIn(FlaskForm):
 	p_id = StringField('p_id', validators=[DataRequired()])
 	room_id = StringField('p_id', validators=[DataRequired()])
+
+
+class Medicine(FlaskForm):
+	med_id = StringField('serv_id', validators=[DataRequired()])
+	units = IntegerField('units', validators=[DataRequired()])
+	status = StringField('status', validators=[DataRequired()])
+	submit = SubmitField('Add')
+
+class InputID(FlaskForm):
+	id = StringField('id', validators=[DataRequired()])
+	submit = SubmitField('Update')
 
 
 

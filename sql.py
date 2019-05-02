@@ -33,11 +33,8 @@ def insert(params, select, table_with_id):
 
     values = [f"\'{str(params[prop])}\'" for prop in header]
 
-    print(values)
-   
-    print(", ".join(values))
     sql = f"""INSERT INTO {select}({", ".join(header)}) VALUES ({", ".join(values)});"""
-    print(sql)
+
     conn = None
     try:
         # read database configuration
@@ -60,6 +57,7 @@ def insert(params, select, table_with_id):
 
 def get_query(select):
     conn = None
+    header = get_header(select)
     data = []
     try:
         params = config()
@@ -68,7 +66,10 @@ def get_query(select):
         cur.execute(f"SELECT * FROM {select}")
         row = cur.fetchone()
         while row is not None:
-            data.append(row)
+            toAdd = {}
+            for i in range(len(header)):
+                toAdd[header[i]] = row[i]
+            data.append(toAdd)
             row = cur.fetchone()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -77,6 +78,72 @@ def get_query(select):
         if conn is not None:
             conn.close()
     return data
+
+def filter(select, values):
+    conn = None
+    header = get_header(select)
+    values = [f"\'{str(values[prop])}\'" for prop in values.keys()]
+
+    values = [prop + "=" + f"\'{str(values[prop])}\'" for prop in values.keys()]
+    values = ", ".join(values)
+    print(values)
+    data = []
+    try:
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        cur.execute(f"SELECT * FROM {select} WHERE {values}")
+        row = cur.fetchone()
+        while row is not None:
+            toAdd = {}
+            for i in range(len(header)):
+                toAdd[header[i]] = row[i]
+            data.append(toAdd)
+            row = cur.fetchone()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return data
+
+def update(select, id, params):
+    header = get_header(select)
+
+    values = [f"\'{str(params[prop])}\'" for prop in params.keys()]
+
+    values = [prop + "=" + f"\'{str(params[prop])}\'" for prop in params.keys()]
+    values = ", ".join(values)
+    print(values)
+
+    sql = f"""
+        UPDATE {select}
+        SET {values}
+        WHERE {header[0]} = {id};
+    """
+
+    print(sql)
+
+    conn = None
+    try:
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql)
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 def get_header(select):
