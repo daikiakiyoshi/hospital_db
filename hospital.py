@@ -28,7 +28,7 @@ table_to_properties = {
 	"treatedby"		 : ["doc_id", "p_id"],
 	"service"		 : ["name", "category", "price", "unit_type"],
 	"medicine"		 : ["name", "price", "unit_type"],
-	"rooms"			 : ["room_type", "max_beds", "available_beds"],
+	"rooms"			 : ["room_id", "room_type", "max_beds", "available_beds"],
 	"stays_in"		 : ["p_id", "room_id"]
 
 }
@@ -84,7 +84,7 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}   
 
-	table_with_id = ["billed_medicine","billed_service"]
+	table_with_id = ["billed_medicine","billed_service", "rooms"]
 
 	select = request.args.get('select')
 
@@ -94,7 +94,9 @@ def insert():
 	# get insert form
 	form = table_to_class[select]
 	# get update form
-	form_update = i_forms.InputID()
+	form_update = i_forms.Update()
+	# get delete form
+	form_delete = i_forms.Delete()
 
 	header = sql.get_header(select)
 
@@ -114,20 +116,29 @@ def insert():
 		sql.insert(params, select, table_with_id)
 		# Display updated table
 		data = sql.get_query(select)
-
 		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update)
-
-		return redirect(url_for('insert', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update))
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete)
 
 	if form_update.validate_on_submit():
+		print('hi')
 		return redirect(url_for('update', id = form_update.id.data, select=select))
 
+	if form_delete.validate_on_submit():
+		#print('hello')
+		return redirect(url_for('delete', id = form_delete.id.data, select=select))
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update)
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete)
 
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+	id = request.args.get("id")
+	select = request.args.get('select')
+
+	#delete 
+	sql.delete(select, id)
+	#jump to insert page
+	return redirect(url_for('insert', title='insert', select=select))
 
 
 
@@ -190,44 +201,7 @@ def update():
 		return redirect(url_for('insert', title='insert', select=select))
 
 	return render_template("update.html", select=select, form=form, header=header, need_id=need_id, columns=columns)
-	
 
-@app.route('/handling', methods=['GET', 'POST'])
-def handling():
-
-	# query data from the database
-	row = request.args.get("row")
-
-	header = request.args.get("header")
-
-	# table to update/delete
-	select = request.args.get('select')
-	print(row)
-	print(header)
-	print(select)
-
-
-	#return redirect(url_for('result', title='result', select=select))
-	return render_template('handling.html', title='result', row=row, header=header, select=select)
-
-
-@app.route('/medicine/<id>', methods=['GET', 'POST'])
-def medicine():
-	if request.method == 'POST':
-		pass
-
-	if request.method == 'GET':
-		data = sql.filter(select, {"med_id" : id})
-
-	header = request.args.get("header")
-
-	# table to update/delete
-	select = request.args.get('select')
-
-	return render_template('handling.html', title='medicine', data=data, header=header, select=select)
-
-
-	
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -253,8 +227,12 @@ def admin():
 
 	if request.method == 'POST':
 		select = request.form.get('table_selected')
-		# jump to insert page which displays input form
-		return redirect(url_for('insert', title='insert', select=select))
+		if access[select] == True:
+			# jump to insert page which displays input form
+			return redirect(url_for('insert', title='insert', select=select))
+		else:
+			# jump to result page which displays data
+			return redirect(url_for('result', title='result', select=select))
 
 	return render_template('admin.html', title='Admin', tables=admin_tables)
 
