@@ -51,7 +51,7 @@
             {{ form_update['id'].label }}
             {{ form_update['id'](size=15) }}
           
-            <div name="action" value="update">{{ form_update.submit() }}</div>
+            <div name="action" value="update">{{ form_update.update() }}</div>
         {% endif %}
     </form>
 
@@ -61,8 +61,7 @@
             {{ form_delete['id'].label }}
             {{ form_delete['id'](size=15) }}
                 <!-- <div name="action" value="insert">{{ form.submit() }}</div> -->
-            <div name="action" value="delete">{{ form_delete.submit() }}</div>
-            {{ form_update.submit() }}
+            <div name="action" value="delete">{{ form_delete.delete() }}</div>
         {% endif %}
     </form>
 

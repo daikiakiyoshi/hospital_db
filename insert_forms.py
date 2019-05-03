@@ -83,11 +83,11 @@ class Medicine(FlaskForm):
 
 class Update(FlaskForm):
 	id = StringField('id', validators=[DataRequired()])
-	submit = SubmitField('Update')
+	update = SubmitField('Update')
 
 class Delete(FlaskForm):
 	id = StringField('id', validators=[DataRequired()])
-	submit = SubmitField('Delete')
+	delete = SubmitField('Delete')
 
 
 
