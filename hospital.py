@@ -30,7 +30,12 @@ table_to_properties = {
 	"medicine"		 : ["name", "price", "unit_type"],
 	"rooms"			 : ["room_id", "room_type", "max_beds", "available_beds"],
 	"stays_in"		 : ["p_id", "room_id"]
+}
 
+accomp_table = {
+	"billed_service": "service",
+	"billed_medicine": "medicine",
+	"stays_in": "rooms"
 }
 
 @app.route('/')
@@ -84,8 +89,11 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}   
 
-	table_with_id = ["billed_medicine","billed_service", "rooms"]
 
+	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
+
+
+	# main select table
 	select = request.args.get('select')
 
 	# query data from the selected table
@@ -105,6 +113,15 @@ def insert():
 
 	need_id = select in table_with_id
 
+	#if table need an accompanying table
+	if need_id:
+		second_table = accomp_table[select]
+		data_acc = sql.get_query(second_table)
+		header_acc = sql.get_header(second_table)
+	else: 
+		second_table, data_acc, header_acc = None, None, None
+
+
 	if form.validate_on_submit():
 		params = {}
 		for prop in table_to_properties[select]:
@@ -116,8 +133,10 @@ def insert():
 		sql.insert(params, select, table_with_id)
 		# Display updated table
 		data = sql.get_query(select)
+
 		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete)
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
 
 	if form_update.validate_on_submit():
 		print('hi')
@@ -128,7 +147,8 @@ def insert():
 		return redirect(url_for('delete', id = form_delete.id.data, select=select))
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete)
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
 
 @app.route('/delete', methods=['GET', 'POST'])
 def delete():
@@ -141,7 +161,6 @@ def delete():
 	return redirect(url_for('insert', title='insert', select=select))
 
 
-
 @app.route('/result', methods=['GET', 'POST'])
 def result():
 	select = request.args.get('select')
@@ -152,6 +171,7 @@ def result():
 	header = sql.get_header(select)
 
 	return render_template('result.html', title='result', data=data, header=header, select=select)
+
 
 @app.route('/update', methods=["GET", "POST"])
 def update():
@@ -170,8 +190,6 @@ def update():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}
 
-	table_with_id = ["billed_medicine","billed_service"]
-
 	id = request.args.get("id")
 
 	select = request.args.get("select")
@@ -184,8 +202,6 @@ def update():
 
 	# get columns
 	columns = table_to_properties[select]
-
-	need_id = select in table_with_id
 
 	if form.validate_on_submit():
 		params = {}
@@ -200,8 +216,8 @@ def update():
 		#jump to insert page
 		return redirect(url_for('insert', title='insert', select=select))
 
-	return render_template("update.html", select=select, form=form, header=header, need_id=need_id, columns=columns)
-
+	return render_template("update.html", select=select, form=form, header=header, columns=columns)
+	
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

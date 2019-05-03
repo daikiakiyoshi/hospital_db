@@ -9,7 +9,6 @@
     <form action="" method="post" novalidate>
         {% if form %}
             {{ form.hidden_tag() }}
-
             <table>
                 {% for item in columns %}
                     <td>
@@ -24,6 +23,7 @@
 
 
    {% if data %}
+        <h3> Table {{select}} </h3>
         <table>
             <tr>
                 {% for item in header %}
@@ -62,7 +62,30 @@
             {{ form_delete['id'](size=15) }}
                 <!-- <div name="action" value="insert">{{ form.submit() }}</div> -->
             <div name="action" value="delete">{{ form_delete.submit() }}</div>
+            {{ form_update.submit() }}
         {% endif %}
     </form>
+
+    {% if second_table %}
+        <h3>Table {{second_table}} </h3>
+        <table>
+            <tr>
+                {% for item in header_acc %}
+                    <th>{{item}}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+            {% for row in data_acc %}
+                <tr>
+                        {% for attr in row %}
+                            <td>
+                                {{row[attr]}}
+                            </td>
+                        {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
 
 {% endblock %}
