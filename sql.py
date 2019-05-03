@@ -261,4 +261,3 @@ def get_total_bill(p_id):
 
     return total_bill
     
-print(get_total_bill(1))

@@ -74,7 +74,7 @@ def doctor():
 
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
-
+	print(request.method)
 	table_to_class = {
 		"patient_records": i_forms.AddPatient(),
 		"billed_medicine": i_forms.AddBilledMedicine(),
