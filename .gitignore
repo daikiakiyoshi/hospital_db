@@ -1,5 +1,5 @@
 __pychache__/
-venv
+venv/
 .vscode
 __pycache__/sql.cpython-36.pyc
 *.pyc
