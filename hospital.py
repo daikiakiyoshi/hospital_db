@@ -253,6 +253,9 @@ def admin():
 
 	return render_template('admin.html', title='Admin', tables=admin_tables)
 
+@app.route("/bill/<p_id>", methods=["GET"])
+def bill(p_id):
+	return str(sql.get_total_bill(p_id))
 
 
 if __name__ == '__main__':
