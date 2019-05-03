@@ -1,13 +1,10 @@
-# todo
-# add form (generalized version)
-# add comments
-
 from flask import Flask
 from flask import render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
+
 import insert_forms as i_forms
 import os
 import time
@@ -19,6 +16,26 @@ class Config(object):
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+table_to_properties = {
+	"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
+	"billed_service" : ["p_id", "serv_id", "units", "status"],
+	"billed_medicine": ["p_id","med_id", "units", "status"],
+	"doctors"		 : ["name", "title"],
+	"departments"	 : ["name"],
+	"worksfor"		 : ["doc_id", "dep_id"],
+	"treatedby"		 : ["doc_id", "p_id"],
+	"service"		 : ["name", "category", "price", "unit_type"],
+	"medicine"		 : ["name", "price", "unit_type"],
+	"rooms"			 : ["room_id", "room_type", "max_beds", "available_beds"],
+	"stays_in"		 : ["p_id", "room_id"]
+}
+
+accomp_table = {
+	"billed_service": "service",
+	"billed_medicine": "medicine",
+	"stays_in": "rooms"
+}
 
 @app.route('/')
 @app.route('/index')
@@ -51,27 +68,132 @@ def doctor():
 			return redirect(url_for('result', title='result', select=select))
 
 
-	#return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header, select=select)
 	return render_template('doctor.html', title='Doctor', tables=doctor_tables)
 
 
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
-	table_to_properties = {
+	print(request.method)
+	table_to_class = {
+		"patient_records": i_forms.AddPatient(),
+		"billed_medicine": i_forms.AddBilledMedicine(),
+		"billed_service" : i_forms.AddBilledService(),
+		"doctors"		 : i_forms.AddDoctors(),
+		"departments"	 : i_forms.AddDepartments(),
+		"worksfor"		 : i_forms.AddWorksFor(),
+		"treatedby"		 : i_forms.AddTreatedBy(),
+		"service"		 : i_forms.AddService(),
+		"medicine"		 : i_forms.AddMedicine(),
+		"rooms"			 : i_forms.AddRooms(),
+		"stays_in"		 : i_forms.AddStaysIn(),
+	}   
 
-		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis", "doc_id"],
-		"billed_service" : ["p_id", "serv_id", "units", "status"],
-		"billed_medicine": ["p_id","med_id", "units", "status"],
-		"doctors"		 : ["name", "title"],
-		"departments"	 : ["name"],
-		"worksfor"		 : ["doc_id", "dep_id"],
-		"treatedby"		 : ["doc_id", "p_id"],
-		"service"		 : ["name", "category", "price", "unit_type"],
-		"medicine"		 : ["name", "price", "unit_type"],
-		"rooms"			 : ["room_type", "max_beds", "available_beds"],
-		"stays_in"		 : ["p_id", "room_id"]
+	# list of tables that need to provide id's when creating a new row.
+	# for the remaining tables, id's are auto-generated
+	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
 
-	}
+	error = request.args.get('error')
+
+	# main select table
+	select = request.args.get('select')
+
+	# query data from the selected table
+	data = sql.get_query(select)
+
+	existing_ids = sql.get_ids(select)
+
+	# get insert form
+	form = table_to_class[select]
+	# get update form
+	form_update = i_forms.Update()
+	# get delete form
+	form_delete = i_forms.Delete()
+
+	# print("form", form.validate_on_submit())
+	# print("update", form_update.update.data,  form_update.validate_on_submit())
+	# print("delete", form_delete.delete.data, form_delete.validate_on_submit())
+	# print("\n\n\n\n")
+
+	header = sql.get_header(select)
+
+	# get columns
+	columns = table_to_properties[select]
+
+	need_id = select in table_with_id
+
+	#if table need an accompanying table
+	if need_id:
+		second_table = accomp_table[select]
+		data_acc = sql.get_query(second_table)
+		header_acc = sql.get_header(second_table)
+	else: 
+		second_table, data_acc, header_acc = None, None, None
+
+	if form.validate_on_submit():
+		params = {}
+		for prop in table_to_properties[select]:
+			value = getattr(form, prop).data
+			if isinstance(value, datetime.date):
+				value = value.strftime('%Y-%m-%d')
+			params[prop] = value
+
+		error = sql.insert(params, select, table_with_id)
+		# Display updated table
+		data = sql.get_query(select)
+
+		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc, error=error)
+
+
+	if form_delete.delete.data and form_delete.validate_on_submit():
+		if form_delete.id.data in existing_ids:
+			return redirect(url_for('delete', id = form_delete.id.data, select=select))
+		else: 
+			error = "ID does not exist in " + select
+			return redirect(url_for('insert', select=select, error=error))
+
+	if form_update.update.data and form_update.validate_on_submit():
+		if form_update.id.data in existing_ids:
+			return redirect(url_for('update', id = form_update.id.data, select=select))
+		else: 
+			error = "ID does not exist in " + select
+			return redirect(url_for('insert', select=select, error=error))
+
+		
+
+	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
+							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc, error=error)
+
+
+
+
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+	id = request.args.get("id")
+	select = request.args.get('select')
+
+	#delete 
+	sql.delete(select, id)
+	#jump to insert page
+	return redirect(url_for('insert', title='insert', select=select))
+
+
+@app.route('/result', methods=['GET', 'POST'])
+def result():
+	select = request.args.get('select')
+	# query data from the database
+	data = sql.get_query(select)
+
+	# get header
+	header = sql.get_header(select)
+
+	return render_template('result.html', title='result', data=data, header=header, select=select)
+
+
+@app.route('/update', methods=["GET", "POST"])
+def update():
 
 	table_to_class = {
 		"patient_records": i_forms.AddPatient(),
@@ -87,24 +209,20 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}
 
-	table_with_id = ["billed_medicine","billed_service"]
+	#error = None
 
-	select = request.args.get('select')
+	id = request.args.get("id")
 
-	# query data from the database
-	data = sql.get_query(select)
+	select = request.args.get("select")
 
 	# get insert form
 	form = table_to_class[select]
 
 	#get header
-	#header = sql.get_header(select)
 	header = sql.get_header(select)
 
 	# get columns
 	columns = table_to_properties[select]
-
-	need_id = select in table_with_id
 
 	if form.validate_on_submit():
 		params = {}
@@ -113,43 +231,14 @@ def insert():
 			if isinstance(value, datetime.date):
 				value = value.strftime('%Y-%m-%d')
 			params[prop] = value
+		print(id, params)
 
-		sql.insert(params, select, table_with_id)
+		sql.update(select, id, params)
 
-		# params = [getattr(form, prop).data for prop in table_to_properties[select]]
-		# columns = table_to_properties[select]
+		#jump to insert page
+		return redirect(url_for('insert', title='insert', select=select))
 
-		# if select == "patient_records":
-		# 	params = params[:-1]
-
-		# temp_params = []
-		# for param in params:
-		# 	#convert datetime.date into string
-		# 	if isinstance(param, datetime.date):
-		# 		temp_params.append(param.strftime('%Y-%m-%d'))
-		# 	else:
-		# 		temp_params.append(param)
-
-		# insert
-		# sql.insert(tuple(temp_params), select, ', '.join(columns))
-
-		# jump to query result page which displays input form
-		return redirect(url_for('result', title='result', select=select))
-
-	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns)
-
-@app.route('/result', methods=['GET', 'POST'])
-def result():
-	select = request.args.get('select')
-	# query data from the database
-	data = sql.get_query(select)
-
-	# get header
-	header = sql.get_header(select)
-
-	return render_template('result.html', title='result', data=data, header=header, select=select)
-
+	return render_template("update.html", select=select, form=form, header=header, columns=columns)
 	
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -176,10 +265,27 @@ def admin():
 
 	if request.method == 'POST':
 		select = request.form.get('table_selected')
-		# jump to insert page which displays input form
-		return redirect(url_for('insert', title='insert', select=select))
+		if access[select] == True:
+			# jump to insert page which displays input form
+			return redirect(url_for('insert', title='insert', select=select))
+		else:
+			# jump to result page which displays data
+			return redirect(url_for('result', title='result', select=select))
 
 	return render_template('admin.html', title='Admin', tables=admin_tables)
+
+@app.route("/bill", methods=["GET", "POST"])
+def bill():
+	form = i_forms.Bill()
+	bill = None
+
+	if form.submit.data and form.validate_on_submit():
+		p_id = form.id.data
+		print(p_id)
+		bill = sql.get_total_bill(p_id)
+
+	return render_template('bill.html', title='Bill', form=form, bill=bill)
+
 
 
 

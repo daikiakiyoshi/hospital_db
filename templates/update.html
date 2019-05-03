@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if select %}
+        <h2>Update entry in {{select}} </h2>
+    {% endif %}
+
+    <form action="" method="post" novalidate>
+        {% if form %}
+            {{ form.hidden_tag() }}
+            <table>
+                {% for item in columns %}
+                    <td>
+                        {{ form[item].label }}
+                        {{ form[item](size=15) }}
+                    </td>
+                {% endfor %}
+                <!-- <div name="action" value="insert">{{ form.submit() }}</div> -->
+                <td name="action" value="update">{{ form.submit() }}</td>
+            </table>
+        {% endif %}
+    </form>
+
+{% endblock %}

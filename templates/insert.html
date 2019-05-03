@@ -5,53 +5,89 @@
     {% if select %}
         <h2>Add a new entry to {{select}} </h2>
     {% endif %}
+
     <form action="" method="post" novalidate>
         {% if form %}
             {{ form.hidden_tag() }}
-
+            <table>
                 {% for item in columns %}
-                    <p>
-                        {{ form[item].label }}<br>
-                        {{ form[item](size=32) }}
-                    </p>
+                    <td>
+                        {{ form[item].label }}
+                        {{ form[item](size=15) }}
+                    </td>
                 {% endfor %}
-
-
-<!--             {% if need_id %}
-                {% for item in header %}
-                    <p>
-                        {{ form[item].label }}<br>
-                        {{ form[item](size=32) }}
-                    </p>
-                {% endfor %}
-            {% else %}
-                {% for item in header[1:] %}
-                    <p>
-                        {{ form[item].label }}<br>
-                        {{ form[item](size=32) }}
-                    </p>
-                {% endfor %}
-            {% endif %} -->
-
-            <p name="action" value="insert">{{ form.submit() }}</p>
+                <td name="action" value="insert">{{ form.submit() }}</td>
+            </table>
         {% endif %}
     </form>
 
-    {% if data %}
-        <table>
+
+    {% if error %}
+        <p class="alert alert-danger">{{error}}</p>
+    {% endif %}
+
+
+   {% if data %}
+        <h3> Table {{select}} </h3>
+        <table class="table">
             <tr>
                 {% for item in header %}
                     <th>{{item}}</th>
                 {% endfor %}
             </tr>
             {% for row in data %}
+                <tr>
+                        {% for attr in row %}
+                            <td>
+                                {{row[attr]}}
+                            </td>
+                        {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p class="alert alert-primary">There is no record in this table</p>
+    {% endif %}
+
+    <br>
+
+    <form action="" method="post" novalidate>
+        {% if form_update %}
+            {{ form_update.hidden_tag() }}
+            {{ form_update['id'].label }}
+            {{ form_update['id'](size=15) }}
+            {{ form_update.update() }}
+        {% endif %}
+    </form>
+
+    <form action="" method="post" novalidate>
+        {% if form_delete %}
+            {{ form_delete.hidden_tag() }}
+            {{ form_delete['id'].label }}
+            {{ form_delete['id'](size=15) }}
+            {{ form_delete.delete() }}
+        {% endif %}
+    </form>
+
+    {% if second_table %}
+        <h3>Table {{second_table}} </h3>
+        <table class="table">
             <tr>
-                {% for attr in row %}
-                    <td>{{attr}}</td>
+                {% for item in header_acc %}
+                    <th>{{item}}</th>
                 {% endfor %}
             </tr>
+            {% for row in data_acc %}
+                <tr>
+                        {% for attr in row %}
+                            <td>
+                                {{row[attr]}}
+                            </td>
+                        {% endfor %}
+                </tr>
             {% endfor %}
         </table>
     {% endif %}
+
 
 {% endblock %}
