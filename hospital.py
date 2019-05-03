@@ -91,7 +91,7 @@ def insert():
 
 	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
 
-	error = None
+	error = request.args.get('error')
 
 	# main select table
 	select = request.args.get('select')
@@ -100,7 +100,6 @@ def insert():
 	data = sql.get_query(select)
 
 	existing_ids = sql.get_ids(select)
-	print(existing_ids)
 
 	# get insert form
 	form = table_to_class[select]
@@ -109,10 +108,10 @@ def insert():
 	# get delete form
 	form_delete = i_forms.Delete()
 
-	print("form", form.validate_on_submit())
-	print("update", form_update.update.data,  form_update.validate_on_submit())
-	print("delete", form_delete.delete.data, form_delete.validate_on_submit())
-	print("\n\n\n\n")
+	# print("form", form.validate_on_submit())
+	# print("update", form_update.update.data,  form_update.validate_on_submit())
+	# print("delete", form_delete.delete.data, form_delete.validate_on_submit())
+	# print("\n\n\n\n")
 
 	header = sql.get_header(select)
 
@@ -150,18 +149,21 @@ def insert():
 		if form_delete.id.data in existing_ids:
 			return redirect(url_for('delete', id = form_delete.id.data, select=select))
 		else: 
-			return redirect(url_for('insert', select=select))
+			error = "ID does not exist in " + select
+			return redirect(url_for('insert', select=select, error=error))
 
 	if form_update.update.data and form_update.validate_on_submit():
 		if form_update.id.data in existing_ids:
 			return redirect(url_for('update', id = form_update.id.data, select=select))
 		else: 
-			return redirect(url_for('insert', select=select))
+			error = "ID does not exist in " + select
+			return redirect(url_for('insert', select=select, error=error))
+
 		
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
 							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
-							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc, error=error)
 
 
 
@@ -230,7 +232,7 @@ def update():
 			params[prop] = value
 		print(id, params)
 
-		#error = sql.update(select, id, params)
+		sql.update(select, id, params)
 
 		#jump to insert page
 		return redirect(url_for('insert', title='insert', select=select))
