@@ -53,9 +53,11 @@ def insert(params, select, table_with_id):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        return error
     finally:
         if conn is not None:
             conn.close()
+    return None
 
 
 def get_query(select):
@@ -113,6 +115,7 @@ def filter(select, values):
 
 def update(select, id, params):
     header = get_header(select)
+    #error = None
 
     values = [f"\'{str(params[prop])}\'" for prop in params.keys()]
 
@@ -142,9 +145,11 @@ def update(select, id, params):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        #return error
     finally:
         if conn is not None:
             conn.close()
+    #return error
 
 def delete(select, id):
     header = get_header(select)
@@ -195,8 +200,27 @@ def get_header(select):
             conn.close()
     return header
 
-if __name__ == '__main__':
-    create_tables()
+def get_ids(select):
+    """ query data from the vendors table """
+    conn = None
+    header = get_header(select)
+    data = []
+    try:
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        cur.execute(f"SELECT {header[0]} FROM {select}")
+        row = cur.fetchone()
+        while row is not None:
+            data.append(row[0])
+            row = cur.fetchone()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return data
 
 
 def get_total_bill(p_id):
@@ -261,3 +285,5 @@ def get_total_bill(p_id):
 
     return total_bill
     
+if __name__ == '__main__':
+    create_tables()

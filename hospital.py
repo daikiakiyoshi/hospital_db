@@ -92,11 +92,16 @@ def insert():
 	# for the remaining tables, id's are auto-generated
 	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
 
+	error = None
+
 	# main select table
 	select = request.args.get('select')
 
 	# query data from the selected table
 	data = sql.get_query(select)
+
+	existing_ids = sql.get_ids(select)
+	print(existing_ids)
 
 	# get insert form
 	form = table_to_class[select]
@@ -133,24 +138,34 @@ def insert():
 				value = value.strftime('%Y-%m-%d')
 			params[prop] = value
 
-		sql.insert(params, select, table_with_id)
+		error = sql.insert(params, select, table_with_id)
 		# Display updated table
 		data = sql.get_query(select)
 
 		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
 							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
-							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc, error=error)
 
 
 	if form_delete.delete.data and form_delete.validate_on_submit():
-		return redirect(url_for('delete', id = form_delete.id.data, select=select))
+		if form_delete.id.data in existing_ids:
+			return redirect(url_for('delete', id = form_delete.id.data, select=select))
+		else: 
+			return redirect(url_for('insert', select=select))
 
 	if form_update.update.data and form_update.validate_on_submit():
-		return redirect(url_for('update', id = form_update.id.data, select=select))
+		if form_update.id.data in existing_ids:
+			return redirect(url_for('update', id = form_update.id.data, select=select))
+		else: 
+			return redirect(url_for('insert', select=select))
+		
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
 							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
 							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
+
+
+
 
 @app.route('/delete', methods=['GET', 'POST'])
 def delete():
@@ -192,6 +207,8 @@ def update():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}
 
+	#error = None
+
 	id = request.args.get("id")
 
 	select = request.args.get("select")
@@ -214,7 +231,8 @@ def update():
 			params[prop] = value
 		print(id, params)
 
-		sql.update(select, id, params)
+		#error = sql.update(select, id, params)
+
 		#jump to insert page
 		return redirect(url_for('insert', title='insert', select=select))
 
@@ -254,9 +272,19 @@ def admin():
 
 	return render_template('admin.html', title='Admin', tables=admin_tables)
 
-@app.route("/bill/<p_id>", methods=["GET"])
-def bill(p_id):
-	return str(sql.get_total_bill(p_id))
+@app.route("/bill", methods=["GET", "POST"])
+def bill():
+	form = i_forms.Bill()
+	bill = None
+
+	if form.submit.data and form.validate_on_submit():
+		p_id = form.id.data
+		print(p_id)
+		bill = sql.get_total_bill(p_id)
+
+	return render_template('bill.html', title='Bill', form=form, bill=bill)
+
+
 
 
 if __name__ == '__main__':

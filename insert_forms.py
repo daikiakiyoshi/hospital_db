@@ -39,7 +39,7 @@ class AddDepartments(FlaskForm):
 
 class AddWorksFor(FlaskForm):
 	doc_id = StringField('doc_id', validators=[DataRequired()])
-	dep_id = StringField('serv_id', validators=[DataRequired()])
+	dep_id = StringField('dep_id', validators=[DataRequired()])
 	submit = SubmitField('Add')
 
 
@@ -82,12 +82,16 @@ class Medicine(FlaskForm):
 	submit = SubmitField('Add')
 
 class Update(FlaskForm):
-	id = StringField('id', validators=[DataRequired()])
+	id = IntegerField('Put ID', validators=[DataRequired()])
 	update = SubmitField('Update')
 
 class Delete(FlaskForm):
-	id = StringField('id', validators=[DataRequired()])
+	id = IntegerField('Put ID', validators=[DataRequired()])
 	delete = SubmitField('Delete')
+
+class Bill(FlaskForm):
+	id = IntegerField('Put ID', validators=[DataRequired()])
+	submit = SubmitField('Get Bill')
 
 
 

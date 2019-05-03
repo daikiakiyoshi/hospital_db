@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if select %}
+        <h2>Calculate bill</h2>
+    {% endif %}
+
+    <form action="" method="post" novalidate>
+        {% if form %}
+            {{ form.hidden_tag() }}
+            {{ form['id'].label }}
+            {{ form['id'](size=15) }}
+            <div name="action" value="submit">{{ form.submit() }}</div>
+        {% endif %}
+    </form>
+
+    {% if bill %}
+        <div>The total bill is ${{bill}}</div>
+    {% endif %}
+
+
+
+{% endblock %}
