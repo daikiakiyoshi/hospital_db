@@ -18,7 +18,6 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 table_to_properties = {
-
 	"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
 	"billed_service" : ["p_id", "serv_id", "units", "status"],
 	"billed_medicine": ["p_id","med_id", "units", "status"],
@@ -74,7 +73,7 @@ def doctor():
 
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
-
+	print(request.method)
 	table_to_class = {
 		"patient_records": i_forms.AddPatient(),
 		"billed_medicine": i_forms.AddBilledMedicine(),
@@ -89,6 +88,8 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}   
 
+	# list of tables that need to provide id's when creating a new row.
+	# for the remaining tables, id's are auto-generated
 	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
 
 	error = request.args.get('error')
