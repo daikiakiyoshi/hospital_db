@@ -1,13 +1,10 @@
-# todo
-# add form (generalized version)
-# add comments
-
 from flask import Flask
 from flask import render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
+
 import insert_forms as i_forms
 import os
 import time
@@ -19,6 +16,22 @@ class Config(object):
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+table_to_properties = {
+
+	"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
+	"billed_service" : ["p_id", "serv_id", "units", "status"],
+	"billed_medicine": ["p_id","med_id", "units", "status"],
+	"doctors"		 : ["name", "title"],
+	"departments"	 : ["name"],
+	"worksfor"		 : ["doc_id", "dep_id"],
+	"treatedby"		 : ["doc_id", "p_id"],
+	"service"		 : ["name", "category", "price", "unit_type"],
+	"medicine"		 : ["name", "price", "unit_type"],
+	"rooms"			 : ["room_type", "max_beds", "available_beds"],
+	"stays_in"		 : ["p_id", "room_id"]
+
+}
 
 @app.route('/')
 @app.route('/index')
@@ -51,27 +64,11 @@ def doctor():
 			return redirect(url_for('result', title='result', select=select))
 
 
-	#return render_template('doctor.html', title='Doctor', tables=doctor_tables, form=form, data=data, header=header, select=select)
 	return render_template('doctor.html', title='Doctor', tables=doctor_tables)
 
 
 @app.route('/insert', methods=['GET', 'POST'])
 def insert():
-	table_to_properties = {
-
-		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
-		"billed_service" : ["p_id", "serv_id", "units", "status"],
-		"billed_medicine": ["p_id","med_id", "units", "status"],
-		"doctors"		 : ["name", "title"],
-		"departments"	 : ["name"],
-		"worksfor"		 : ["doc_id", "dep_id"],
-		"treatedby"		 : ["doc_id", "p_id"],
-		"service"		 : ["name", "category", "price", "unit_type"],
-		"medicine"		 : ["name", "price", "unit_type"],
-		"rooms"			 : ["room_type", "max_beds", "available_beds"],
-		"stays_in"		 : ["p_id", "room_id"]
-
-	}
 
 	table_to_class = {
 		"patient_records": i_forms.AddPatient(),
@@ -85,21 +82,20 @@ def insert():
 		"medicine"		 : i_forms.AddMedicine(),
 		"rooms"			 : i_forms.AddRooms(),
 		"stays_in"		 : i_forms.AddStaysIn(),
-	}
+	}   
 
 	table_with_id = ["billed_medicine","billed_service"]
 
 	select = request.args.get('select')
 
-	# query data from the database
+	# query data from the selected table
 	data = sql.get_query(select)
 
 	# get insert form
 	form = table_to_class[select]
+	# get update form
 	form_update = i_forms.InputID()
-	print(form_update)
-	#get header
-	#header = sql.get_header(select)
+
 	header = sql.get_header(select)
 
 	# get columns
@@ -116,6 +112,9 @@ def insert():
 			params[prop] = value
 
 		sql.insert(params, select, table_with_id)
+
+		return redirect(url_for('insert', title='insert', form=form, data=data, header=header, 
+							select=select, need_id=need_id, columns=columns, form_update=form_update))
 
 	if form_update.validate_on_submit():
 		return redirect(url_for('update', id = form_update.id.data, select=select))
@@ -141,24 +140,6 @@ def result():
 @app.route('/update', methods=["GET", "POST"])
 def update():
 
-	table_with_id = ["billed_medicine","billed_service"]
-
-	table_to_properties = {
-
-		"patient_records": ["name", "age", "ssn", "date_in", "date_out", "diagnosis"],
-		"billed_service" : ["p_id", "serv_id", "units", "status"],
-		"billed_medicine": ["p_id","med_id", "units", "status"],
-		"doctors"		 : ["name", "title"],
-		"departments"	 : ["name"],
-		"worksfor"		 : ["doc_id", "dep_id"],
-		"treatedby"		 : ["doc_id", "p_id"],
-		"service"		 : ["name", "category", "price", "unit_type"],
-		"medicine"		 : ["name", "price", "unit_type"],
-		"rooms"			 : ["room_type", "max_beds", "available_beds"],
-		"stays_in"		 : ["p_id", "room_id"]
-
-	}
-
 	table_to_class = {
 		"patient_records": i_forms.AddPatient(),
 		"billed_medicine": i_forms.AddBilledMedicine(),
@@ -172,6 +153,8 @@ def update():
 		"rooms"			 : i_forms.AddRooms(),
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}
+
+	table_with_id = ["billed_medicine","billed_service"]
 
 	id = request.args.get("id")
 
@@ -198,9 +181,10 @@ def update():
 		print(id, params)
 
 		sql.update(select, id, params)
-
+		return redirect(url_for('result', select=select))
 
 	return render_template("update.html", select=select, form=form, header=header, need_id=need_id, columns=columns)
+	
 
 @app.route('/handling', methods=['GET', 'POST'])
 def handling():
