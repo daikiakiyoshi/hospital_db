@@ -30,7 +30,12 @@ table_to_properties = {
 	"medicine"		 : ["name", "price", "unit_type"],
 	"rooms"			 : ["room_type", "max_beds", "available_beds"],
 	"stays_in"		 : ["p_id", "room_id"]
+}
 
+accomp_table = {
+	"billed_service": "service",
+	"billed_medicine": "medicine",
+	"stays_in": "rooms"
 }
 
 @app.route('/')
@@ -84,8 +89,9 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}   
 
-	table_with_id = ["billed_medicine","billed_service"]
+	table_with_id = ["billed_medicine","billed_service", "stays_in"]
 
+	# main select table
 	select = request.args.get('select')
 
 	# query data from the selected table
@@ -103,6 +109,15 @@ def insert():
 
 	need_id = select in table_with_id
 
+	#if table need an accompanying table
+	if need_id:
+		second_table = accomp_table[select]
+		data_acc = sql.get_query(second_table)
+		header_acc = sql.get_header(second_table)
+	else: 
+		second_table, data_acc, header_acc = None, None, None
+
+
 	if form.validate_on_submit():
 		params = {}
 		for prop in table_to_properties[select]:
@@ -115,20 +130,17 @@ def insert():
 		# Display updated table
 		data = sql.get_query(select)
 
-		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update)
-
 		return redirect(url_for('insert', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update))
+							select=select, need_id=need_id, columns=columns, form_update=form_update,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc))
 
 	if form_update.validate_on_submit():
 		return redirect(url_for('update', id = form_update.id.data, select=select))
 
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
-							select=select, need_id=need_id, columns=columns, form_update=form_update)
-
-
+							select=select, need_id=need_id, columns=columns, form_update=form_update,
+							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
 
 
 @app.route('/result', methods=['GET', 'POST'])
@@ -141,6 +153,7 @@ def result():
 	header = sql.get_header(select)
 
 	return render_template('result.html', title='result', data=data, header=header, select=select)
+
 
 @app.route('/update', methods=["GET", "POST"])
 def update():
@@ -159,8 +172,6 @@ def update():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}
 
-	table_with_id = ["billed_medicine","billed_service"]
-
 	id = request.args.get("id")
 
 	select = request.args.get("select")
@@ -173,8 +184,6 @@ def update():
 
 	# get columns
 	columns = table_to_properties[select]
-
-	need_id = select in table_with_id
 
 	if form.validate_on_submit():
 		params = {}
@@ -189,42 +198,42 @@ def update():
 		#jump to insert page
 		return redirect(url_for('insert', title='insert', select=select))
 
-	return render_template("update.html", select=select, form=form, header=header, need_id=need_id, columns=columns)
+	return render_template("update.html", select=select, form=form, header=header, columns=columns)
 	
 
-@app.route('/handling', methods=['GET', 'POST'])
-def handling():
+# @app.route('/handling', methods=['GET', 'POST'])
+# def handling():
 
-	# query data from the database
-	row = request.args.get("row")
+# 	# query data from the database
+# 	row = request.args.get("row")
 
-	header = request.args.get("header")
+# 	header = request.args.get("header")
 
-	# table to update/delete
-	select = request.args.get('select')
-	print(row)
-	print(header)
-	print(select)
-
-
-	#return redirect(url_for('result', title='result', select=select))
-	return render_template('handling.html', title='result', row=row, header=header, select=select)
+# 	# table to update/delete
+# 	select = request.args.get('select')
+# 	print(row)
+# 	print(header)
+# 	print(select)
 
 
-@app.route('/medicine/<id>', methods=['GET', 'POST'])
-def medicine():
-	if request.method == 'POST':
-		pass
+# 	#return redirect(url_for('result', title='result', select=select))
+# 	return render_template('handling.html', title='result', row=row, header=header, select=select)
 
-	if request.method == 'GET':
-		data = sql.filter(select, {"med_id" : id})
 
-	header = request.args.get("header")
+# @app.route('/medicine/<id>', methods=['GET', 'POST'])
+# def medicine():
+# 	if request.method == 'POST':
+# 		pass
 
-	# table to update/delete
-	select = request.args.get('select')
+# 	if request.method == 'GET':
+# 		data = sql.filter(select, {"med_id" : id})
 
-	return render_template('handling.html', title='medicine', data=data, header=header, select=select)
+# 	header = request.args.get("header")
+
+# 	# table to update/delete
+# 	select = request.args.get('select')
+
+# 	return render_template('handling.html', title='medicine', data=data, header=header, select=select)
 
 
 	

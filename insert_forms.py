@@ -9,7 +9,7 @@ class AddPatient(FlaskForm):
 	age = IntegerField('Age', validators=[DataRequired()])
 	ssn = StringField('SSN', validators=[DataRequired()])
 	date_in = DateField('Date In', format ="%Y-%m-%d", validators=[DataRequired()])
-	date_out = DateField('Date Out', format ="%Y-%m-%d", validators=[DataRequired()])
+	date_out = DateField('Date Out', format ="%Y-%m-%d")
 	diagnosis = StringField('Diagnosis', validators=[DataRequired()])
 	submit = SubmitField('Add')
 

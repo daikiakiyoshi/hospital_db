@@ -9,13 +9,6 @@
     <form action="" method="post" novalidate>
         {% if form %}
             {{ form.hidden_tag() }}
-
-<!--                 {% for item in columns %}
-                    <p>
-                        {{ form[item].label }}<br>
-                        {{ form[item](size=32) }}
-                    </p>
-                    {% endfor %} -->
             <table>
                 {% for item in columns %}
                     <td>
