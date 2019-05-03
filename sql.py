@@ -195,9 +195,6 @@ def get_header(select):
             conn.close()
     return header
 
-if __name__ == '__main__':
-    create_tables()
-
 
 def get_total_bill(p_id):
     """Get the total bill for a patient record given the patient record id"""
@@ -261,4 +258,5 @@ def get_total_bill(p_id):
 
     return total_bill
     
-print(get_total_bill(1))
+if __name__ == '__main__':
+    create_tables()

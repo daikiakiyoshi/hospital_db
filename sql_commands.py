@@ -30,8 +30,8 @@ CREATE_DEPARTMENTS = """
 # TODO: check if this is the correct way to specify the types of the attributes
 CREATE_WORKSFOR = """
     CREATE TABLE worksfor (
-        doc_id INTEGER REFERENCES doctors(doc_id),
-        dep_id INTEGER REFERENCES departments(dep_id)
+        doc_id INTEGER REFERENCES doctors(doc_id) ON DELETE CASCADE,
+        dep_id INTEGER REFERENCES departments(dep_id) ON DELETE CASCADE
     )
 """
 
@@ -49,8 +49,8 @@ CREATE_PATIENT_RECORDS = """
 
 CREATE_TREATED_BY = """
     CREATE TABLE treatedby (
-        doc_id INTEGER REFERENCES doctors(doc_id),
-        p_id INTEGER REFERENCES patient_records(p_id)
+        doc_id INTEGER REFERENCES doctors(doc_id) ON DELETE CASCADE,
+        p_id INTEGER REFERENCES patient_records(p_id) ON DELETE CASCADE
     )
 """
 
@@ -75,8 +75,8 @@ CREATE_MEDICINE = """
 
 CREATE_BILLED_SERVICE = """
     CREATE TABLE billed_service (
-        p_id INTEGER REFERENCES patient_records(p_id),
-        serv_id INTEGER REFERENCES service(serv_id),
+        p_id INTEGER REFERENCES patient_records(p_id) ON DELETE CASCADE,
+        serv_id INTEGER REFERENCES service(serv_id) ON DELETE CASCADE,
         units INTEGER,
         status VARCHAR(255) NOT NULL
     )
@@ -84,8 +84,8 @@ CREATE_BILLED_SERVICE = """
 
 CREATE_BILLED_MEDICINE = """
     CREATE TABLE billed_medicine (
-        p_id INTEGER REFERENCES patient_records(p_id),
-        med_id INTEGER REFERENCES medicine(med_id),
+        p_id INTEGER REFERENCES patient_records(p_id) ON DELETE CASCADE,
+        med_id INTEGER REFERENCES medicine(med_id) ON DELETE CASCADE,
         units INTEGER,
         status VARCHAR(255) NOT NULL
     )
@@ -102,8 +102,8 @@ CREATE_ROOMS = """
 
 STAYS_IN = """
     CREATE TABLE stays_in (
-        p_id INTEGER REFERENCES patient_records(p_id),
-        room_id VARCHAR(255) REFERENCES rooms(room_id)
+        p_id INTEGER REFERENCES patient_records(p_id) ON DELETE CASCADE,
+        room_id VARCHAR(255) REFERENCES rooms(room_id) ON DELETE CASCADE
     )
 """
 

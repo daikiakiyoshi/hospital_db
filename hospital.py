@@ -253,9 +253,19 @@ def admin():
 
 	return render_template('admin.html', title='Admin', tables=admin_tables)
 
-@app.route("/bill/<p_id>", methods=["GET"])
-def bill(p_id):
-	return str(sql.get_total_bill(p_id))
+@app.route("/bill", methods=["GET", "POST"])
+def bill():
+	form = i_forms.Bill()
+	bill = None
+
+	if form.submit.data and form.validate_on_submit():
+		p_id = form.id.data
+		print(p_id)
+		bill = sql.get_total_bill(p_id)
+
+	return render_template('bill.html', title='Bill', form=form, bill=bill)
+
+
 
 
 if __name__ == '__main__':
