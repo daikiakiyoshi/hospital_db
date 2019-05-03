@@ -107,6 +107,13 @@ STAYS_IN = """
     )
 """
 
+INSERT_PATIENTS = """
+    INSERT INTO patient_records(name, age, ssn, date_in, date_out, diagnosis)
+    VALUES
+        ('james', '20', '123145', '2017-03-14', '2017-03-14', 'healthy'),
+        ('daiki', '20', '123145', '2017-03-14', '2017-03-14', 'healthy');
+"""
+
 INSERT_DOCTORS = """
     INSERT INTO doctors(name, title)
     VALUES
@@ -147,7 +154,22 @@ INSERT_MEDICINE = """
         ('med 5', 1.00, 'tablet');
 """
 
+INSERT_BILLED_MED = """
+    INSERT INTO billed_medicine (p_id, med_id, units, status)
+    VALUES
+        (1, 1, 20, 'Unpaid'),
+        (1, 2, 10, 'Unpaid')
+"""
+
+INSERT_BILLED_SERV = """
+    INSERT INTO billed_service (p_id, serv_id, units, status)
+    VALUES
+        (1, 1, 2, 'Unpaid'),
+        (1, 2, 1, 'Unpaid')
+"""
+
 CREATE_STATEMENTS = [DROP_ALL, CREATE_DOCTORS, CREATE_DEPARTMENTS, CREATE_WORKSFOR, CREATE_PATIENT_RECORDS,
                         CREATE_TREATED_BY, CREATE_SERVICE, CREATE_MEDICINE, CREATE_BILLED_SERVICE,
-                        CREATE_BILLED_MEDICINE, CREATE_ROOMS, STAYS_IN, INSERT_DOCTORS, INSERT_DEPARTMENTS,
-                        INSERT_MEDICINE, INSERT_SERVICES]
+                        CREATE_BILLED_MEDICINE, CREATE_ROOMS, STAYS_IN, INSERT_DOCTORS, INSERT_DEPARTMENTS, INSERT_PATIENTS,
+                        INSERT_MEDICINE, INSERT_SERVICES,
+                        INSERT_BILLED_MED, INSERT_BILLED_SERV]
