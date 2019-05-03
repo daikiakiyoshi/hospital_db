@@ -89,9 +89,7 @@ def insert():
 		"stays_in"		 : i_forms.AddStaysIn(),
 	}   
 
-
 	table_with_id = ["billed_medicine","billed_service", "rooms", "stays_in"]
-
 
 	# main select table
 	select = request.args.get('select')
@@ -105,6 +103,11 @@ def insert():
 	form_update = i_forms.Update()
 	# get delete form
 	form_delete = i_forms.Delete()
+
+	print("form", form.validate_on_submit())
+	print("update", form_update.update.data,  form_update.validate_on_submit())
+	print("delete", form_delete.delete.data, form_delete.validate_on_submit())
+	print("\n\n\n\n")
 
 	header = sql.get_header(select)
 
@@ -120,7 +123,6 @@ def insert():
 		header_acc = sql.get_header(second_table)
 	else: 
 		second_table, data_acc, header_acc = None, None, None
-
 
 	if form.validate_on_submit():
 		params = {}
@@ -138,13 +140,12 @@ def insert():
 							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
 							second_table=second_table, data_acc=data_acc, header_acc=header_acc)
 
-	if form_update.validate_on_submit():
-		print('hi')
-		return redirect(url_for('update', id = form_update.id.data, select=select))
 
-	if form_delete.validate_on_submit():
-		#print('hello')
+	if form_delete.delete.data and form_delete.validate_on_submit():
 		return redirect(url_for('delete', id = form_delete.id.data, select=select))
+
+	if form_update.update.data and form_update.validate_on_submit():
+		return redirect(url_for('update', id = form_update.id.data, select=select))
 
 	return render_template('insert.html', title='insert', form=form, data=data, header=header, 
 							select=select, need_id=need_id, columns=columns, form_update=form_update, form_delete=form_delete,
