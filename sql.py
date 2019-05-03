@@ -84,35 +84,6 @@ def get_query(select):
             conn.close()
     return data
 
-def filter(select, values):
-    conn = None
-    header = get_header(select)
-    values = [f"\'{str(values[prop])}\'" for prop in values.keys()]
-
-    values = [prop + "=" + f"\'{str(values[prop])}\'" for prop in values.keys()]
-    values = ", ".join(values)
-    print(values)
-    data = []
-    try:
-        params = config()
-        conn = psycopg2.connect(**params)
-        cur = conn.cursor()
-        cur.execute(f"SELECT * FROM {select} WHERE {values}")
-        row = cur.fetchone()
-        while row is not None:
-            toAdd = {}
-            for i in range(len(header)):
-                toAdd[header[i]] = row[i]
-            data.append(toAdd)
-            row = cur.fetchone()
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
-    return data
-
 def update(select, id, params):
     header = get_header(select)
     #error = None
