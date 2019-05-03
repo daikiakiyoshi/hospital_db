@@ -30,10 +30,12 @@ def insert(params, select, table_with_id):
 
     if select not in table_with_id:
         header = header[1:]
+    print(header)
 
     values = [f"\'{str(params[prop])}\'" for prop in header]
 
     sql = f"""INSERT INTO {select}({", ".join(header)}) VALUES ({", ".join(values)});"""
+    print(sql)
 
     conn = None
     try:
@@ -54,6 +56,7 @@ def insert(params, select, table_with_id):
     finally:
         if conn is not None:
             conn.close()
+
 
 def get_query(select):
     conn = None
@@ -122,6 +125,36 @@ def update(select, id, params):
         SET {values}
         WHERE {header[0]} = {id};
     """
+
+    conn = None
+    try:
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql)
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+def delete(select, id):
+    header = get_header(select)
+
+    sql = f"""
+        DELETE FROM {select}
+        WHERE {header[0]} = {id};
+    """
+
+    print(sql)
 
     conn = None
     try:
