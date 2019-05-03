@@ -76,7 +76,7 @@ CREATE_MEDICINE = """
 CREATE_BILLED_SERVICE = """
     CREATE TABLE billed_service (
         p_id INTEGER REFERENCES patient_records(p_id),
-        serv_id INTEGER PRIMARY KEY,
+        serv_id INTEGER REFERENCES service(serv_id),
         units INTEGER,
         status VARCHAR(255) NOT NULL
     )
@@ -85,7 +85,7 @@ CREATE_BILLED_SERVICE = """
 CREATE_BILLED_MEDICINE = """
     CREATE TABLE billed_medicine (
         p_id INTEGER REFERENCES patient_records(p_id),
-        med_id INTEGER PRIMARY KEY,
+        med_id INTEGER REFERENCES medicine(med_id),
         units INTEGER,
         status VARCHAR(255) NOT NULL
     )

@@ -112,6 +112,11 @@ def insert():
 			params[prop] = value
 
 		sql.insert(params, select, table_with_id)
+		# Display updated table
+		data = sql.get_query(select)
+
+		return render_template('insert.html', title='insert', form=form, data=data, header=header, 
+							select=select, need_id=need_id, columns=columns, form_update=form_update)
 
 		return redirect(url_for('insert', title='insert', form=form, data=data, header=header, 
 							select=select, need_id=need_id, columns=columns, form_update=form_update))
@@ -181,7 +186,8 @@ def update():
 		print(id, params)
 
 		sql.update(select, id, params)
-		return redirect(url_for('result', select=select))
+		#jump to insert page
+		return redirect(url_for('insert', title='insert', select=select))
 
 	return render_template("update.html", select=select, form=form, header=header, need_id=need_id, columns=columns)
 	
@@ -204,20 +210,6 @@ def handling():
 	#return redirect(url_for('result', title='result', select=select))
 	return render_template('handling.html', title='result', row=row, header=header, select=select)
 
-# @app.route('/medicine/', methods=['GET', 'POST'])
-# def medicine():
-# 	# if request.method == 'POST':
-# 	# 	pass
-
-# 	# if request.method == 'GET':
-# 	# 	data = sql.filter(select, {"med_id" : id})
-
-# 	# header = request.args.get("header")
-
-# 	# # table to update/delete
-# 	# select = request.args.get('select')
-
-# 	return render_template('handling.html', title='medicine', data=data, header=header, select=select)
 
 @app.route('/medicine/<id>', methods=['GET', 'POST'])
 def medicine():

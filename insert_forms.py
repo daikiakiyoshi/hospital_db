@@ -16,7 +16,7 @@ class AddPatient(FlaskForm):
 # Is the user typing in medicine ID? How would the user know the ID?
 class AddBilledMedicine(FlaskForm):
 	p_id = StringField('p_id', validators=[DataRequired()])
-	med_id = StringField('serv_id', validators=[DataRequired()])
+	med_id = StringField('med_id', validators=[DataRequired()])
 	units = IntegerField('units', validators=[DataRequired()])
 	status = StringField('status', validators=[DataRequired()])
 	submit = SubmitField('Add')
